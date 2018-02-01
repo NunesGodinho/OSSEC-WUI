@@ -8,15 +8,17 @@ Copyright (C) 2017 António Godinho
 
 - Updated database schema for OSSEC 2.9.x (last version tested 2.9.2)
 
-- Bootstrap framework included (3.3 version)
+- Bootstrap framework included (3.3 version), changes on the layout
 
 - Font Awesome 4.7.0  included
 
-- Javascript packages upgraded
+- Javascript packages upgraded (Jquery, Amcharts, sortable)
 
 - Pages changed to the frameworks included
 
 - Amcharts upgraded. Several fixes related to this upgrade
+
+
 
 TODO: I'm open to sugestions :-)
 
