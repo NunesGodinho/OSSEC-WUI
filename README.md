@@ -22,7 +22,8 @@ TODO: I'm open to sugestions :-)
 
 
 
-This software is based on AnaLogi by ECSC Ltd.
+**This software is based on AnaLogi by ECSC Ltd.**
+
 AnaLogi hasn't been updated for several years, and with the database schema changes on OSSEC 2.9 it stoped working.
 
 Available from:
