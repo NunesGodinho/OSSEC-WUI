@@ -1,8 +1,11 @@
-**OSSEC WUI v1.0**
+**OSSEC WUI v1.1**
 =======
 
-Copyright (C) 2017 António Godinho
+Copyright (C) 2018 António Godinho
 
+------ Changes on v1.1 -------
+
+Fixes on Amcharts.
 
 ------ Changes on v1.0 -------
 
