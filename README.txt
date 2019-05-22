@@ -2,7 +2,8 @@
 =======
 
 Copyright (C) 2019 António Godinho
------- Changes on v2.0 -------
+
+---------------------- Changes on v2.0 ----------------------
 
 Updates:
 
@@ -10,11 +11,11 @@ Updates:
     - Amcharts 4
 
 
------- Changes on v1.1 -------
+---------------------- Changes on v1.1 ----------------------
 
 Fixes on Amcharts.
 
------- Changes on v1.0 -------
+---------------------- Changes on v1.0 ----------------------
 
 - Updated database schema for OSSEC 2.9.x (last version tested 2.9.2)
 
@@ -32,7 +33,7 @@ Fixes on Amcharts.
 
 TODO: I'm open to sugestions :-)
 
-
+------------------------------------------------------------------
 
 **This software is based on AnaLogi by ECSC Ltd.**
 
