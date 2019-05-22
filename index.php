@@ -1,203 +1,296 @@
 <?php
 /*
- * Copyright (c) 2017 António 'Tó' Godinho <to@isec.pt>.
+ * Copyright (c) 2012 Andy 'Rimmer' Shepherd <andrew.shepherd@ecsc.co.uk> (ECSC Ltd).
  * This program is free software; Distributed under the terms of the GNU GPL v3.
  */
-?>
-<!DOCTYPE html>
-<html lang="pt">
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <title>OSSEC WUI</title>
-    <?php
-    //include "page_refresh.php";
-    ?>
-    <link href="./css/bootstrap.min.css" rel="stylesheet">
-    <link href="./css/style.css" rel="stylesheet" type="text/css"/>
-    <link href="./css/sticky-footer.css" rel="stylesheet">
-    <script src="./js/amcharts.js" type="text/javascript"></script>
-    <script src="./js/serial.js" type="text/javascript"></script>
-    <script src="./js/themes/light.js" type="text/javascript"></script>
 
-    <script type="text/javascript">
+require './top.php';
 
-        <?php
-        include './php/index_graph.php';
-        ?>
 
-        function databasetest() {
-            <!--  If no data, alerts will be created in here  -->
-            <?php #include './databasetest.php' ?>
+## filter criteria 'level'
+if(isset($_GET['level']) && preg_match("/^[0-9]+$/", $_GET['level'])){
+	$inputlevel=$_GET['level'];
+}else{
+	$inputlevel=$glb_level;
+}
+$query="SELECT distinct(level) FROM signature ORDER BY level";
+$result=mysql_query($query, $db_ossec);
+$filterlevel="";
+while($row = @mysql_fetch_assoc($result)){
+	$selected="";
+	if($row['level']==$inputlevel){
+		$selected=" SELECTED";
+	}
+	$filterlevel.="<option value='".$row['level']."'".$selected.">".$row['level']." +</option>";
+}
+
+
+## filter from
+if(isset($_GET['hours']) && preg_match("/^[0-9]+$/", $_GET['hours'])){
+	$inputhours=$_GET['hours'];
+}else{
+	$inputhours=$glb_hours;
+} 
+
+## filter category
+if(isset($_GET['category']) && preg_match("/^[0-9]+$/", $_GET['category'])){
+	$inputcategory=$_GET['category'];
+	$wherecategory=" AND category.cat_id=".$inputcategory." ";
+}else{
+	$inputcategory="";
+	$wherecategory=" ";
+}
+$query="SELECT *
+	FROM category
+	ORDER BY cat_name";
+$result=mysql_query($query, $db_ossec);
+$filtercategory="";
+while($row = @mysql_fetch_assoc($result)){
+	$selected="";
+        if($row['cat_id']==$inputcategory){
+                $selected=" SELECTED";
         }
+	$filtercategory.="<option value='".$row['cat_id']."'".$selected.">".$row['cat_name']."</option>";
+}
 
-        var chart = AmCharts.makeChart("chartdiv", {
-            type: 'serial',
-            theme: 'light',
-            dataProvider: chartData,
-            dataDateFormat: "YYYY-MM-DD",
-            categoryField: 'date',
-            startDuration: 0.5,
-            balloon: {
-                color: '#000000'
-            },
-            zoomOutOnDataUpdate: true,
-            pathToImages: './js/images/',
-            zoomOutButton: true,
-            zoomOutButtonColor: '#000000',
-            zoomOutButtonAlpha: 0.15,
-            categoryAxis: {
-                fillAlpha: 1,
-                fillColor: '#FAFAFA',
-                gridAlpha: 0,
-                axisAlpha: 0,
-                gridPosition: 'start',
-                position: 'top',
-                parseDates: true,
-                minPeriod: 'mm'
-            },
-            valueAxes: [
-                {
-                    title: 'Alerts',
-                    logarithmic: <?php echo $glb_indexgraphlogarithmic; ?>
-                }
-            ],
-            chartScrollbar: {
-                updateOnReleaseOnly: true,
-                //"graph" : graph0,
-                scrollbarHeight: 40,
-                color: '#000000',
-                gridColor: '#000000',
-                backgroundColor: '#FFFFFF',
-                autoGridCount: true
-            },
-            <?php
-            if ($glb_indexgraphbubbletext == 1) {
-                echo "
-                    chartCursor: {
-                        cursorPosition : 'mouse',
-                        categoryBalloonDateFormat : 'JJ:NN, DD MMMM'
-                    },";
-            }
-            if ($glb_indexgraphkey == 1) {
-                echo "
-                    legend: {
-                        markerType: 'circle'
-                    },";
-            }
-            ?>
-            chartCursor: {
-                pan: false,
-                zoomable: true
-            },
-            guides: [
-                <?php
-                echo $workinghoursguide;
-                ?>
-            ]
-        });
 
-        chart.validateNow();
-        <?php
-        echo $graphlines;
-        ?>
-        chart.validateNow();
+## filter
+$radiosource="";
+$radiopath="";
+$radiolevel="";
+$radiorule_id="";
+if(isset($_GET['field']) && $_GET['field']=='path'){
+	$radiopath="checked";
+}elseif(isset($_GET['field']) && $_GET['field']=='level'){
+	$radiolevel="checked";
+}elseif(isset($_GET['field']) && $_GET['field']=='rule_id'){
+	$radiorule_id="checked";
+}elseif(isset($_GET['field']) && $_GET['field']=='source'){
+	$radiosource="checked";
+}else{
+	if($glb_graphbreakdown=="source"){
+		$radiosource="checked";
+	}elseif($glb_graphbreakdown=="path"){
+		$radiopath="checked";
+	}elseif($glb_graphbreakdown=="level"){
+		$radiolevel="checked";
+	}elseif($glb_graphbreakdown=="rule_id"){
+		$radiorule_id="checked";
+	}else{
+		# default source
+		$radiosource="checked";
+	}
+}
 
-    </script>
 
+?>
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>AnaLogi - OSSEC WUI</title>
+
+
+<?php
+include "page_refresh.php";
+?>
+
+<link href="./style.css" rel="stylesheet" type="text/css" />
+<script src="./amcharts/amcharts.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+
+	function databasetest(){
+		<!--  If no data, alerts will be created in here  -->
+		<?php #include './databasetest.php' ?>
+
+	}
+
+
+
+	var chart;
+
+	<?php
+	include './php/index_graph.php';
+	?>
+
+
+	AmCharts.ready(function () {
+		// SERIAL CHART
+		chart = new AmCharts.AmSerialChart();
+		chart.dataProvider = chartData;
+		chart.categoryField = "date";
+		chart.startDuration = 0.5;
+		chart.balloon.color = "#000000";
+		chart.zoomOutOnDataUpdate=true;
+		chart.pathToImages = "./images/";
+		chart.zoomOutButton = {
+			backgroundColor: '#000000',
+			backgroundAlpha: 0.15
+		};
+
+		// listen for "dataUpdated" event (fired when chart is rendered) and call zoomChart method when it happens
+		chart.addListener("dataUpdated", zoomChart);
+
+		// AXES
+		// category
+		var categoryAxis = chart.categoryAxis;
+		categoryAxis.fillAlpha = 1;
+		categoryAxis.fillColor = "#FAFAFA";
+		categoryAxis.gridAlpha = 0;
+		categoryAxis.axisAlpha = 0;
+		categoryAxis.gridPosition = "start";
+		categoryAxis.position = "top";		
+		categoryAxis.parseDates = true;
+		categoryAxis.minPeriod = "mm";
+
+		<?php
+		## See top.php for more info
+		#include './php/index_graph_icinga.php';
+		?>
+
+		// value
+		var valueAxis = new AmCharts.ValueAxis();
+		chart.addValueAxis(valueAxis);
+		valueAxis.logarithmic = <?php echo $glb_indexgraphlogarithmic; ?>;
+		valueAxis.title = "Alerts";
+
+		// this method is called when chart is first inited as we listen for "dataUpdated" event
+		function zoomChart() {
+			// replaced by chart.zoomOutOnDataUpdate
+		}
+
+		// SCROLLBAR
+		var chartScrollbar = new AmCharts.ChartScrollbar();
+		chartScrollbar.graph = graph0;
+		chartScrollbar.scrollbarHeight = 40;
+		chartScrollbar.color = "#000000";
+		chartScrollbar.gridColor = "#000000";
+		chartScrollbar.backgroundColor = "#FFFFFF";
+		chartScrollbar.autoGridCount = true;
+		chart.addChartScrollbar(chartScrollbar);
+
+		
+		<?php
+		if($glb_indexgraphbubbletext==1){
+		echo "
+		// chartCursor
+		var chartCursor = new AmCharts.ChartCursor();
+          	chartCursor.cursorPosition = 'mouse';
+                chartCursor.categoryBalloonDateFormat = 'JJ:NN, DD MMMM';
+		chart.addChartCursor(chartCursor);
+		";
+		}
+		?>	
+
+		// changes cursor mode from pan to select
+		function setPanSelect() {
+			if (document.getElementById("rb1").checked) {
+				chartCursor.pan = false;
+				chartCursor.zoomable = true;
+			} else {
+				chartCursor.pan = true;
+			}
+			chart.validateNow();
+		}  
+
+
+
+		<?php
+		echo $graphlines; 
+		echo $workinghoursguide
+		?>
+
+		<?php
+		if($glb_indexgraphkey==1){
+		echo "
+		// LEGEND
+		var legend = new AmCharts.AmLegend();
+		legend.markerType = 'circle';
+		chart.addLegend(legend);";
+		}
+		?>
+
+
+		
+		<?php
+		echo $graphheight;
+		?>
+		// WRITE
+		chart.write("chartdiv");
+
+	});
+</script>
+	
 
 </head>
 <body onload="databasetest();">
+
 <?php include './header.php'; ?>
+		
+<div class='clr'></div>	
 
-<div class="container-fluid" style="padding-top: 80px;">
+<div id="chartdiv" style="width:100%; height:500px;"><?php echo $nochartdata; ?></div>
+	
+<div class='top10header'>Filters</div>
 
-    <div class="row">
-        <div id="chartdiv" style="width:100%; height:500px;"><?php echo $nochartdata; ?></div>
-    </div>
-    <div class="row">
-        <div class="col-lg-12">
-            <ul class="nav nav-pills" role="tablist" style="width: 100%;">
-                <li role="presentation" class="active" style="width: 100%;"><a href="#"
-                                                                               style="font-weight: 800">Filters</a></li>
-            </ul>
-        </div>
-    </div>
+<div>
+	<form method='GET' action='./index.php'>
+		<div class='fleft filters'>
+			Level<br/>
+			<select name='level'>
+				<option value=''>--</option>
+				<?php echo $filterlevel; ?>
+			</select>
+		</div>
+		<div class='fleft filters'>
+			Hours<br/>
+			<input type='text' size='6' name='hours' value='<?php echo $inputhours; ?>' />
+		</div>
+		<div class='fleft filters'>
+			Graph Breakdown<br/>
+			<input type='radio' name='field' value='source' <?php echo $radiosource; ?> />Source
+			<input type='radio' name='field' value='path' <?php echo $radiopath; ?> />Path
+			<input type='radio' name='field' value='level' <?php echo $radiolevel; ?> />Level
+			<input type='radio' name='field' value='rule_id' <?php echo $radiorule_id; ?> />Rule ID
+		</div>
+		<div class='fleft filters'>
+			Category<br/>
+			<select name='category'>
+				<option value=''>--</option>
+				<?php echo $filtercategory; ?>
+			</select>
+		</div>
+		<div class='fleft filters'>
+			<br/>
+			<input type='submit' value='..go..' />
+		</div>
+	</form>
+</div>
 
-    <form method='GET' action='./index.php' class="form-inline">
-        <div class="row">
-            <div class="col-lg-1 form-group">
-                <label>Level</label>
-            </div>
-            <div class="col-lg-2 form-group">
-                <label>Hours</label>
-            </div>
-            <div class="col-lg-4 form-group">
-                <label>Graph Breakdown</label>
-            </div>
-            <div class="col-lg-4 form-group">
-                <label>Category</label>
-            </div>
-            <div class="col-lg-1 vc">
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-lg-1 form-group">
-                <select name='level' class="form-control">
-                    <option value=''>--</option>
-                    <?php echo $filterlevel; ?>
-                </select>
-            </div>
-            <div class="col-lg-2 form-group">
-                <input type='text' class="form-control" name='hours' value='<?php echo $inputhours; ?>'/>
-            </div>
-            <div class="col-lg-4 form-group">
-                <input type='radio' name='field' value='source' class="checkbox-inline" <?php echo $radiosource; ?> />Source
-                <input type='radio' name='field' value='path' class="checkbox-inline" <?php echo $radiopath; ?> />Path
-                <input type='radio' name='field' value='level' class="checkbox-inline" <?php echo $radiolevel; ?> />Level
-                <input type='radio' name='field' value='rule_id' class="checkbox-inline" <?php echo $radiorule_id; ?> />Rule
-                ID
-            </div>
-            <div class="col-lg-4 form-group">
-                <select name='category' class="form-control">
-                    <option value=''>--</option>
-                    <?php echo $filtercategory; ?>
-                </select>
-            </div>
-            <div class="col-lg-1 form-group">
-                <input type='submit' value='..go..' class="btn btn-warning"/>
-            </div>
-        </div>
-    </form>
+<div class='clr' style='margin:10px;'>&nbsp;</div>
 
+<div id="top10s" class="top10s">
+	<div class='fleft maincol'>
+		<?php include './php/topid.php'; ?>
 
-    <hr/>
+	</div>
+	<div class='fleft maincol'>
+		<?php include './php/toplocation.php'; ?>
 
-    <div class="row">
-        <div class="col-lg-4 col-md-4 col-xs-4">
-            <?php include './php/topid.php'; ?>
-        </div>
-        <div class="col-lg-4 col-md-4 col-xs-4">
-            <?php include './php/toplocation.php'; ?>
-        </div>
-        <div class="col-lg-4 col-md-4 col-xs-4">
-            <?php include './php/toprare.php'; ?>
-        </div>
-    </div>
+	</div>
+	<div class='fleft maincol'>
+		<?php include './php/toprare.php'; ?>
 
-    <div class='row'></div>
+	</div>
+</div>
 
-    <?php
-    include './footer.php';
-    ?>
-    <script language="JavaScript">
-        <?php
-        echo $graphheight;
-        ?>
-    </script>
-</body>
-</html>
+<div class='clr'></div>
+
+<?php
+?>
+
+<?php
+include './footer.php';
+?>

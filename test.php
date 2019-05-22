@@ -3,29 +3,29 @@
 include('php/gnuplot.php');
 
 $p = new GNUPlot();
-$p->draw2DLine(0, 0, 1, 1);
+$p->draw2DLine( 0,0, 1,1);
 $data = new PGData('test Data');
-$data->addDataEntry(array(1, 2));
-$data->addDataEntry(array(2, 3));
-$data->addDataEntry(array(3, 4));
-$data->addDataEntry(array(4, 4));
-$data->addDataEntry(array(5, 3));
+$data->addDataEntry( array(1, 2) );
+$data->addDataEntry( array(2, 3) );
+$data->addDataEntry( array(3, 4) );
+$data->addDataEntry( array(4, 4) );
+$data->addDataEntry( array(5, 3) );
 
 #demoSampleFile();
 $p->setTitle("2D Test");
 $data2 = PGData::createFromFile('plot1.txt', 'data set II');
 
-$p->plotData($data, 'lines', '1:($2)');
-$p->set2DLabel("2D Label", 1, 1);
-$p->plotData($data2, 'linespoints', '($1/20):($2*2)');
+$p->plotData( $data, 'lines', '1:($2)' );
+$p->set2DLabel("2D Label", 1,1 );
+$p->plotData( $data2, 'linespoints', '($1/20):($2*2)' );
 
-$data2->changeLegend('replot II');
+$data2->changeLegend( 'replot II' );
 
-$p->plotData($data2, 'boxes', '($1/20):($2)');
+$p->plotData( $data2, 'boxes', '($1/20):($2)' );
 
 //$p->set("autoscale");
 $p->setRange('y', 0, 5);
-$p->setSize(0.6, 0.6);
+$p->setSize( 0.6, 0.6 );
 $p->export('test2D.png');
 
 $p->close();
