@@ -1,4 +1,4 @@
-**OSSEC WUI v1.1**
+****** OSSEC WUI ******
 =======
 
 Copyright (C) 2019 António Godinho
