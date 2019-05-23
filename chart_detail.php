@@ -1,13 +1,11 @@
 <?php
 /*
- * Copyright (c) 2017 António 'Tó' Godinho <to@isec.pt>.
+ * Copyright (c) 2019 António 'Tó' Godinho <to@isec.pt>.
  * This program is free software; Distributed under the terms of the GNU GPL v3.
  */
 
 
 ## Note - I know that a substring of a timestamp isn't that clean, but this is built for high peformance on a huge table
-
-$mainstring = "";
 
 # var $where is set in the file that calls me
 
@@ -89,7 +87,7 @@ $timegrouping = array();
 $arraylocations = array();
 $arraylocationsunique = array();
 
-echo "var chartData = [
+$mainstring = "var chartData = [
 	";
 
 $anydata = 0;
@@ -109,7 +107,7 @@ while ($rowchart = $stmt->fetch(PDO::FETCH_ASSOC)) {
     # This alert is a new time 'group'...
     if ($tmpdate != $rowchart['res_time']) {
         # ...so what we have compiled needs to go to 'mainstring' (remember to use tmpdate, not the latest row time)
-        $mainstring .= "	{date: new Date(" . date("Y", $tmpdate) . ", " . (date("m", $tmpdate) - 1) . ", " . date("j", $tmpdate) . ", " . date("G", $tmpdate) . ", " . (date("i", $tmpdate)) . "), ";
+        $mainstring .= '	{"date": "' . date("Y", $tmpdate) . '-' . date("m", $tmpdate) . '-' . date("j", $tmpdate) . ', ' . date("G", $tmpdate) . ':' . date("i", $tmpdate) . '",';
 
         foreach ($timegrouping as $key => $val) {
             #append this location to array
@@ -139,7 +137,7 @@ while ($rowchart = $stmt->fetch(PDO::FETCH_ASSOC)) {
 if ($anydata == 1) {
     # only run this last bit if we have any info at all.. if not let the graph be empty
     # We have to run this cycle one more time to process the last row
-    $mainstring .= "	{date: new Date(" . date("Y", $tmpdate) . ", " . (date("m", $tmpdate) - 1) . ", " . date("j", $tmpdate) . ", " . date("G", $tmpdate) . ", " . (date("i", $tmpdate) - 1) . "), ";
+    $mainstring .= '	{"date": "' . date("Y", $tmpdate) . '-' . date("m", $tmpdate) . '-' . date("j", $tmpdate) . ', ' . date("G", $tmpdate) . ':' . date("i", $tmpdate) . '",';
     foreach ($timegrouping as $key => $val) {
         #append this location to array
         $mainstring .= "'" . $key . "': " . $val . ", ";
@@ -151,16 +149,16 @@ if ($anydata == 1) {
 
 # If no end date, presume now, make graph end at today instead of auto scaling, so add a value for today (-1 due to the javascript way of counting months
 if (strlen($inputto) == 0) {
-    $mainstring .= "{date: new Date(" . date("Y, n, j, G, i", strtotime('-1 month ')) . "), 'now': 1},  ";
+    $mainstring .= "{\"date\": \"" . date("Y-n-j, G:i") . "\", 'now': 1},  ";
 } else {
-    $mainstring .= "{date: new Date(" . date("Y, n, j, G, i", strtotime('-1 month ', $lastgraphplot)) . "), 'now': 1},  ";
+    $mainstring .= "{\"date\": \"" . date("Y-n-j, G:i", $lastgraphplot) . "\", 'now': 1},  ";
 }
 
 # tidy up the last concatanator comma, append a nice closing bracket, and dump what we have collected
 $mainstring = substr($mainstring, 0, -3);
 $mainstring .= "
 	];";
-echo $mainstring;
+//echo $mainstring;
 
 
 ## Right now to define graphs line dynamically from the location array
@@ -169,23 +167,23 @@ $arraylocationsunique = array_unique($arraylocations);
 asort($arraylocationsunique);
 
 
-$graphlines = "";
-foreach ($arraylocationsunique as $i => $location) {
-    $graphlines .= '
-		// GRAPHS
-		// Graph ' . $i . '
-		var graph' . $i . ' = new AmCharts.AmGraph();
-		graph' . $i . '.title = "' . $keyprepend . $location . '";
-		graph' . $i . '.valueField = "' . $location . '";
-		graph' . $i . '.bullet = "round";
-		graph' . $i . '.bulletSize = 10;
-        graph' . $i . '.bulletBorderThickness = 10;
-		graph' . $i . '.hideBulletsCount = 30;
-		graph' . $i . '.balloonText = "' . $keyprepend . $location . ' : [[value]]";
-		//graph' . $i . '.connect = false;
-		graph' . $i . '.lineThickness = 1;
-		chart.addGraph(graph' . $i . ');
-';
-}
 
+$series = "//SERIES";
+foreach ($arraylocationsunique as $i => $location) {
+    $series .= '	// Series ' . $i . '
+			var series' . $i . ' = chart.series.push(new am4charts.LineSeries());
+                        series' . $i . '.dataFields.valueY = "' . $keyprepend . $location . '";
+                        series' . $i . '.dataFields.dateX = "date";
+                        series' . $i . '.name = "' . $keyprepend . $location . '";
+                        series' . $i . '.strokeWidth = 2;
+                        series' . $i . '.tensionX = 0.8; //smoothen between 0 & 1
+                        series' . $i . '.yAxis = valueAxis;
+                        series' . $i . '.bullets.push(new am4charts.CircleBullet());
+                        series' . $i . '.minBulletDistance = 25;
+                        series' . $i . '.tooltipText = "{name}: [bold]{valueY}[/]";
+                        series' . $i . '.tooltip.background.fillOpacity = 0.6;
+                        //valueAxis.renderer.line.stroke = series' . $i . '.stroke;
+                        //valueAxis.renderer.labels.template.fill = series' . $i . '.stroke;
+	';
+}
 ?>
