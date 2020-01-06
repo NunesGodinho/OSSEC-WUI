@@ -235,10 +235,14 @@ while ($rowchart = $stmt->fetch()) {
 
         foreach ($timegrouping as $key => $val) {
             #append this location to array
-            $mainstring .= "'" . $key . "': " . $val . ", ";
+            if (!empty($val)) {
+                $mainstring .= "'" . $key . "': " . $val . ",";
+            } else {
+                $mainstring .= "'" . $key . "': 0,";
+            }
         }
 
-        $mainstring = substr($mainstring, 0, -2);
+        $mainstring = substr($mainstring, 0, -1);
         $mainstring .= "},
 	";
 
@@ -263,7 +267,11 @@ if ($tmpdate > 1) {
 
     foreach ($timegrouping as $key => $val) {
         #append this location to array
-        $mainstring .= "'" . $key . "': " . $val . ",";
+        if (!empty($val)) {
+            $mainstring .= "'" . $key . "': " . $val . ",";
+        } else {
+            $mainstring .= "'" . $key . "': 0,";
+        }
     }
 
     # the last date point on the graph becomes the last data, so if no data the graph effectively stalls. Adding an empty entry at the end will keep the graph up to date.
@@ -274,7 +282,7 @@ if ($tmpdate > 1) {
     //			{"date": "' . date("Y", $timedown) . '-' . date("m", $timedown) . '-' . date("j", $timedown) . ', ' . date("G", $timedown) . ':' . date("i", $timedown) . '", \'now\':1, ';
     //$mainstring .= '}, ';
     # Clean the variable
-    $mainstring = substr($mainstring, 0, -2);
+    $mainstring = substr($mainstring, 0, -1);
     $mainstring .= "},
 	";
 }

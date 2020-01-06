@@ -5,16 +5,16 @@
  */
 
 if(!defined('DB_USER_O')) {
-    define('DB_USER_O', 'ossec_u');
+    define('DB_USER_O', 'root');
 }
 if(!defined('DB_PASSWORD_O')) {
-    define('DB_PASSWORD_O', 'KUDHRvuDXQLLN6uh');
+    define('DB_PASSWORD_O', 'Passw0rd');
 }
 if(!defined('DB_HOST_O')) {
     define('DB_HOST_O', 'localhost');
 }
 if(!defined('DB_NAME_O')) {
-    define('DB_NAME_O', 'ossec');
+    define('DB_NAME_O', 'ossecdb');
 }
 
 try {

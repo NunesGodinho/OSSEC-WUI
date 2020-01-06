@@ -1,22 +1,10 @@
-AnaLogi v1.0
-Copyright (C) 2012 ECSC Ltd.
+****** OSSEC WUI ******
 
-= Ossec = 
+The only requirement is edit the db_ossec.php file.
 
-If you intend to overwrite a previous version of AnaLogi you may want to
-backup your config.php and db_ossec.php
+Define your database settings, username, password, host and database name.
 
-Install ossec-hids-server (AnaLogi v1.0 built around OSSEC 2.6)
-
-Follow instructions to log to MySQL database
-(currently http://www.ossec.net/doc/manual/output/mysql-database-output.html).
-
-= AnaLogi =
-
-Create a vhost in your webserver (nothing specific required) and place these files in the folder.
-- Of course, following best practise and hardening guides for both the vhost and php.ini
-
-Amend the included db_ossec.php to connect to your SQL database (likely little to change required
-here)
-
-Have a play with config.php
+    define('DB_USER_O', 'ossec_user');
+    define('DB_PASSWORD_O', 'db_password');
+    define('DB_HOST_O', 'localhost');
+    define('DB_NAME_O', 'ossecdb');

@@ -1,91 +1,132 @@
 <?php
 /*
- * Copyright (c) 2012 Andy 'Rimmer' Shepherd <andrew.shepherd@ecsc.co.uk> (ECSC Ltd).
+ * Copyright (c) 2017 António 'Tó' Godinho <to@isec.pt>.
  * This program is free software; Distributed under the terms of the GNU GPL v3.
  */
 require './top.php';
-
 ?>
 
-
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="pt">
 <head>
-<title>AnaLogi - OSSEC WUI</title>
-
-<?php
-include "page_refresh.php";
-?>
-<link href="./style.css" rel="stylesheet" type="text/css" />
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>OSSEC WUI</title>
+    <?php
+    include "page_refresh.php";
+    ?>
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+    <link href="./css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="./css/sticky-footer.css" rel="stylesheet">
 
 </head>
 <body>
-
-<?php includeme("./header.php"); ?>
-
-		
-<div class='clr'></div>	
-
-<div style="width:48%" class='fleft'>	
-	<div class='top10header'>Rule Trend Analysis (~3.5 hours)</div>
-	<?php 
-	# Set vars for this trend analysis
-	$trend_window=10000;
-	$lastfullblock=intval(substr(time(), 0, 6)."0000");
-	?>
-
-	<div class="introbody" style='height:35px;'>Comparing Level <span class='tw'><?php echo $glb_trendlevel; ?></span>+ over Period <?php echo date("D G:ia",$lastfullblock-$trend_window)." -> ".date("D G:ia",$lastfullblock)." over the last <span class='tw'>".$glb_trendweeks?></span> weeks</div>
-	
-	<div style="max-height:300px; overflow:auto;">
-		<?php include "php/newsfeed_trend.php"; ?>	
-	</div>
-</div>
-<div style="width:48%" class='fright'>	
-	<div class='top10header'>Rule Trend Analysis (~28 hours)</div>
-	<?php 
-	# Set vars for this trend analysis
-	$trend_window=100000;
-	$lastfullblock=intval(substr(time(), 0, 5)."00000");
-	?>
-	<div class="introbody" style='height:35px;'>Comparing Level <span class='tw'><?php echo $glb_trendlevel; ?></span>+ over Period <?php echo date("D G:ia",$lastfullblock-$trend_window)." -> ".date("D G:ia",$lastfullblock)." over the last <span class='tw'>".$glb_trendweeks?></span> weeks</div>
-	
-	<div style="max-height:300px; overflow:auto;">
-		<?php include "php/newsfeed_trend.php"; ?>	
-	</div>
-</div>
-
-<div class='clr' style='padding-bottom:10px;'></div>
-
-<div style="width:48%" class='fleft'>	
-	<div class='top10header'>Alert Threat Feed</div>
-	<?php 
-	# Set vars for this trend analysis
-	$trend_window=1000000;
-	$lastfullblock=intval(substr(time(), 0, 5)."000000");
-	?>
-	<div class="introbody" style='height:25px;padding-bottom:10px;'>Grouped list of most important alerts over the last <span class='tw'><?php echo $glb_threatdays; ?></span> days, level <span class='tw'><?php echo $glb_threatdays; ?></span>+.</div>
-	
-	<div style="max-height:300px; overflow:auto;">
-		<?php include './php/newsfeed_threat.php'; ?>
-	</div>
-</div>
-
-<div style="width:48%" class='fright'>	
-	<div class='top10header'>IPs Trending</div>
-	<?php 
-	# Set vars for this trend analysis
-	$trend_window=100000;
-	$lastfullblock=intval(substr(time(), 0, 5)."00000");
-	?>
-	<div class="introbody" style='height:25px;padding-bottom:10px;'>Top <span class='tw'><?php echo $glb_trendip_top; ?></span> IPs appear most in the logs over the last <span class='tw'><?php echo $glb_threatdays ?></span> days<br>One alert may span multiple 'groups'</div>
-	
-	<div style="max-height:300px; overflow:auto;">
-		<?php include './php/newsfeed_trendip.php'; ?>
-	</div>
-</div>
-
-
-<div class='clr'></div>
 <?php
-include 'footer.php';
+$glb_ossecdb = 0;
+include './header.php';
 ?>
+<div class="row">
+    <br/>
+</div>
+<div class="container-fluid" style="padding-top: 80px;">
+    <div class="row">
+        <div class="col-lg-6">
+            <ul class="nav nav-pills" role="tablist" style="width: 100%;">
+                <li role="presentation" class="active" style="width: 100%;"><a href="#" style="font-weight: 800">Rule
+                        Trend Analysis (~3.5 hours)</a></li>
+            </ul>
+        </div>
+        <div class="col-lg-6">
+            <ul class="nav nav-pills" role="tablist" style="width: 100%;">
+                <li role="presentation" class="active" style="width: 100%;"><a href="#" style="font-weight: 800">Rule
+                        Trend Analysis (~28 hours)</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-6">
+            <?php
+            # Set vars for this trend analysis
+            $trend_window = 10000;
+            $lastfullblock = intval(substr(time(), 0, 6) . "0000");
+            ?>
+            <small>Comparing Level <?php echo $glb_trendlevel; ?>+ over
+                Period <?php echo date("D G:ia", $lastfullblock - $trend_window) . " -> " . date("D G:ia", $lastfullblock) . " over the last " . $glb_trendweeks ?>
+                weeks
+            </small>
+            <br/>
+
+            <div style="max-height:300px; overflow:auto;">
+                <?php include "php/newsfeed_trend.php"; ?>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <?php
+            # Set vars for this trend analysis
+            $trend_window = 100000;
+            $lastfullblock = intval(substr(time(), 0, 5) . "00000");
+            ?>
+            <small>Comparing Level <?php echo $glb_trendlevel; ?></small>+ over
+                Period <?php echo date("D G:ia", $lastfullblock - $trend_window) . " -> " . date("D G:ia", $lastfullblock) . " over the last " . $glb_trendweeks ?>
+                weeks
+                <br/>
+
+                <div style="max-height:300px; overflow:auto;">
+                    <?php include "php/newsfeed_trend.php"; ?>
+                </div>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-lg-6">
+            <ul class="nav nav-pills" role="tablist" style="width: 100%;">
+                <li role="presentation" class="active" style="width: 100%;"><a href="#" style="font-weight: 800">Alert
+                        Threat Feed</a></li>
+            </ul>
+        </div>
+        <div class="col-lg-6">
+            <ul class="nav nav-pills" role="tablist" style="width: 100%;">
+                <li role="presentation" class="active" style="width: 100%;"><a href="#" style="font-weight: 800">IPs
+                        Trending</a></li>
+            </ul>
+        </div>
+        <div class="col-lg-6">
+            <?php
+            # Set vars for this trend analysis
+            $trend_window = 1000000;
+            $lastfullblock = intval(substr(time(), 0, 5) . "000000");
+            ?>
+            <small>Grouped list of most important alerts over the last <?php echo $glb_threatdays; ?></small> days,
+                level <?php echo $glb_threatdays; ?>+.
+                <br/>
+
+                <div style="max-height:300px; overflow:auto;">
+                    <?php include './php/newsfeed_threat.php'; ?>
+                </div>
+        </div>
+        <div class="col-lg-6">
+            <?php
+            # Set vars for this trend analysis
+            $trend_window = 100000;
+            $lastfullblock = intval(substr(time(), 0, 5) . "00000");
+            ?>
+            <div class="introbody" style='height:25px;padding-bottom:10px;'>Top <span
+                        class='tw'><?php echo $glb_trendip_top; ?></span> IPs appear most in the logs over the last
+                <span class='tw'><?php echo $glb_threatdays ?></span> days<br>One alert may span multiple 'groups'
+            </div>
+
+            <div style="max-height:300px; overflow:auto;">
+                <?php include './php/newsfeed_trendip.php'; ?>
+            </div>
+        </div>
+    </div>
+
+    <div class='clr'></div>
+    <?php
+    include 'footer.php';
+    ?>
